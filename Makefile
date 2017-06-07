@@ -1,6 +1,6 @@
 DOCKER_USER:=pierres
-DOCKER_ORGANIZATION=archlinux
-DOCKER_IMAGE:=base
+DOCKER_ORGANIZATION ?= archlinux
+DOCKER_IMAGE ?= base
 
 rootfs:
 	$(eval TMPDIR := $(shell mktemp -d))
@@ -28,6 +28,11 @@ ci-test:
 	docker run --rm --privileged --tmpfs=/tmp:exec --tmpfs=/run/shm -v /run/docker.sock:/run/docker.sock \
 		-v $(PWD):/app -w /app $(DOCKER_ORGANIZATION)/$(DOCKER_IMAGE) \
 		sh -c 'pacman -Syu --noconfirm make devtools docker && make docker-image-test'
+
+ci:
+	docker run --rm --privileged --tmpfs=/tmp:exec --tmpfs=/run/shm -v /run/docker.sock:/run/docker.sock \
+		-v $(PWD):/app -w /app $(DOCKER_ORGANIZATION)/$(DOCKER_IMAGE) \
+		sh -c 'pacman -Syu --noconfirm make devtools docker && DOCKER_ORGANIZATION=$(DOCKER_ORGANIZATION) DOCKER_IMAGE=$(DOCKER_IMAGE) make docker-image'
 
 docker-push:
 	docker login -u $(DOCKER_USER)
